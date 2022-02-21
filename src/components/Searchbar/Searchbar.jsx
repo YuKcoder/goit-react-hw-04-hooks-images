@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ImSearch } from 'react-icons/im';
 import { IconContext } from 'react-icons';
@@ -11,65 +11,61 @@ import {
   SearchFormInput,
 } from './Searchbar.styled';
 
-export default class Searchbar extends Component {
-  state = {
-    searchQuery: '',
-  };
+export default function Searchbar({ onSubmit }) {
+  const [searchQuery, setSearchQuery] = useState('');
 
-  handleChange = evt =>
-    this.setState({ searchQuery: evt.currentTarget.value.toLowerCase() });
+  const handleChange = evt =>
+    setSearchQuery(evt.currentTarget.value.toLowerCase());
 
-  handleSubmit = evt => {
+  const handleSubmit = evt => {
     evt.preventDefault();
 
-    if (this.state.searchQuery.trim() === '') {
+    if (searchQuery.trim() === '') {
       toast.error('Please type something');
       return;
     }
 
-    this.props.onSubmit(this.state.searchQuery);
-    this.setState({ searchQuery: '' });
+    onSubmit(searchQuery);
+    setSearchQuery('');
   };
 
-  render() {
-    return (
-      <SearchbarContainer>
-        <SearchForm onSubmit={this.handleSubmit}>
-          <SearchFormBtn type="submit">
-            <IconContext.Provider value={{ color: '#3f51b5', size: '2em' }}>
-              <>
-                <ImSearch />
-              </>
-            </IconContext.Provider>
-
+  return (
+    <SearchbarContainer>
+      <SearchForm onSubmit={handleSubmit}>
+        <SearchFormBtn type="submit">
+          <IconContext.Provider value={{ color: '#3f51b5', size: '2em' }}>
             <>
-              <Toaster
-                position="top-right"
-                reverseOrder={true}
-                toastOptions={{
-                  style: {
-                    border: '2px solid red',
-                    padding: '18px',
-                    fontSize: '16px',
-                  },
-                }}
-              />
+              <ImSearch />
             </>
-            <SearchFormBtnLabel>Search</SearchFormBtnLabel>
-          </SearchFormBtn>
+          </IconContext.Provider>
 
-          <SearchFormInput
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.searchQuery}
-            onChange={this.handleChange}
-          />
-        </SearchForm>
-      </SearchbarContainer>
-    );
-  }
+          <>
+            <Toaster
+              position="top-right"
+              reverseOrder={true}
+              toastOptions={{
+                style: {
+                  border: '2px solid red',
+                  padding: '18px',
+                  fontSize: '16px',
+                },
+              }}
+            />
+          </>
+          <SearchFormBtnLabel>Search</SearchFormBtnLabel>
+        </SearchFormBtn>
+
+        <SearchFormInput
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={searchQuery}
+          onChange={handleChange}
+        />
+      </SearchForm>
+    </SearchbarContainer>
+  );
 }
 
 Searchbar.propTypes = {

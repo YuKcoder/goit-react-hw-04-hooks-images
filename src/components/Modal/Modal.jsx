@@ -1,42 +1,35 @@
 import PropTypes from 'prop-types';
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { Overlay, ModalWindow } from './Modal.styled';
 
-export default class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-    this.switchBodyScroll('hidden');
-  }
+export default function Modal({ closeModal, children }) {
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
-    this.switchBodyScroll('unset');
-  }
-
-  switchBodyScroll(state) {
+  const switchBodyScroll = state => {
     document.body.style.overflow = state;
-  }
+  };
+  switchBodyScroll();
 
-  handleKeyDown = ({ code }) => {
+  const handleKeyDown = ({ code }) => {
     if (code === 'Escape') {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  render() {
-    const { closeModal, children } = this.props;
-    return (
-      <Overlay
-        onClick={({ target, currentTarget }) => {
-          if (target === currentTarget) {
-            closeModal();
-          }
-        }}
-      >
-        <ModalWindow>{children}</ModalWindow>
-      </Overlay>
-    );
-  }
+  return (
+    <Overlay
+      onClick={({ target, currentTarget }) => {
+        if (target === currentTarget) {
+          closeModal();
+        }
+      }}
+    >
+      <ModalWindow>{children}</ModalWindow>
+    </Overlay>
+  );
 }
 
 Modal.propTypes = {
