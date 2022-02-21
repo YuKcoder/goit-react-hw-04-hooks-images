@@ -22,47 +22,50 @@ export default function App() {
     if (searchQuery === '') {
       return;
     }
+
+    const fetchImages = async () => {
+      try {
+        setIsLoading(true);
+        const { data } = await getImages(searchQuery, page);
+
+        if (data.hits.length === 0) {
+          toast.error(
+            'Sorry, there are no images matching your search query.Please try again'
+          );
+          setIsLoading(false);
+          return;
+        }
+        if (page > data.totalHits / 12) {
+          toast.error(
+            'We are sorry, but you have reached the end of search results.'
+          );
+          setIsEndOfArray(true);
+          setIsLoading(false);
+          return;
+        }
+
+        setIsLoading(false);
+        setImages(prevImage => [...prevImage, ...data.hits]);
+
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
     fetchImages();
-  }, [searchQuery]);
+  }, [page, searchQuery]);
+
+  const loadMoreHandler = () => {
+    setPage(prevPage => prevPage + 1);
+  };
 
   const handleFormSubmit = query => {
     setSearchQuery(query);
     setPage(1);
     setImages([]);
-  };
-
-  const fetchImages = async () => {
-    try {
-      setIsLoading(true);
-      const { data } = await getImages(searchQuery, page);
-
-      if (data.hits.length === 0) {
-        toast.error(
-          'Sorry, there are no images matching your search query.Please try again'
-        );
-        setIsLoading(false);
-        return;
-      }
-      if (page > data.totalHits / 12) {
-        toast.error(
-          'We are sorry, but you have reached the end of search results.'
-        );
-        setIsEndOfArray(true);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(false);
-      setImages(prevImage => [...prevImage, ...data.hits]);
-      setPage(prevPage => prevPage + 1);
-
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const openModal = largeImageURL => {
@@ -86,7 +89,7 @@ export default function App() {
       )}
 
       {images.length !== 0 && !isEndOfArray && (
-        <Button onClick={fetchImages}>Load more</Button>
+        <Button onClick={loadMoreHandler}>Load more</Button>
       )}
 
       {showModal && (
